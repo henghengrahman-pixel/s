@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard</title>
+<style>
+body{background:#0f172a;color:#fff;font-family:sans-serif;padding:20px}
+.card{background:#1e293b;padding:15px;margin:10px 0;border-radius:10px}
+input,select,button{margin:5px;padding:8px}
+button{background:#38bdf8;border:none}
+</style>
+</head>
+<body>
+
+<h1>Dashboard Kantor</h1>
+
+<div class="card">
+<h2>Notifikasi</h2>
+<% notif.forEach(n=>{ %>
+<div>⚠️ <%= n.nama %> CUTI / BALIK HARI INI</div>
+<% }) %>
+</div>
+
+<div class="card">
+<h2>Tambah Staff</h2>
+<form method="POST" action="/add/staff">
+<input name="nama" placeholder="Nama">
+<select name="shift"><option>PAGI</option><option>SIANG</option></select>
+<input name="jobdesk" placeholder="Jobdesk">
+<button>Tambah</button>
+</form>
+</div>
+
+<div class="card">
+<h2>Tambah Cuti</h2>
+<form method="POST" action="/add/cuti">
+<input name="nama" placeholder="Nama">
+<input type="date" name="mulai">
+<input type="date" name="selesai">
+<button>Tambah</button>
+</form>
+</div>
+
+<div class="card">
+<h2>Staff</h2>
+<% staff.forEach(s=>{ %>
+<div><%= s.nama %> - <%= s.shift %> - <%= s.jobdesk %></div>
+<% }) %>
+</div>
+
+</body>
+</html>
