@@ -1,37 +1,151 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<title>PRO DASHBOARD</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Kantor PRO</title>
+
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
 socket.on('update',()=>location.reload());
 </script>
+
 <style>
-body{background:#0f172a;color:#fff;font-family:sans-serif;padding:20px}
-.card{background:#1e293b;padding:15px;margin:10px 0;border-radius:12px}
-h2{margin-top:0}
-input,select,button{margin:5px;padding:8px;border-radius:6px;border:none}
-button{background:#22c55e}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, sans-serif;
+}
+
+body{
+  background:#020617;
+  color:#fff;
+  padding:20px;
+}
+
+/* HEADER */
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.header h1{
+  font-size:22px;
+}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:15px;
+}
+
+/* CARD */
+.card{
+  background:#1e293b;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.3);
+}
+
+.card h2{
+  margin-bottom:10px;
+  font-size:16px;
+  color:#38bdf8;
+}
+
+/* FORM */
+input, select{
+  width:100%;
+  padding:10px;
+  margin:5px 0;
+  border:none;
+  border-radius:8px;
+  background:#0f172a;
+  color:#fff;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  margin-top:5px;
+  border:none;
+  border-radius:8px;
+  background:#22c55e;
+  color:#000;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#16a34a;
+}
+
+/* LIST */
+.list{
+  margin-top:10px;
+}
+
+.item{
+  background:#0f172a;
+  padding:10px;
+  border-radius:8px;
+  margin-bottom:8px;
+  font-size:13px;
+}
+
+/* STATUS */
+.status-belum{
+  color:#facc15;
+}
+
+.status-selesai{
+  color:#4ade80;
+}
+
+/* SCROLL */
+.scroll{
+  max-height:250px;
+  overflow:auto;
+}
 </style>
 </head>
+
 <body>
 
-<h1>🔥 DASHBOARD KANTOR PRO</h1>
-
-<div class="card">
-<h2>NOTIFIKASI CUTI</h2>
-<% notif.forEach(n=>{ %>
-<div>⚠️ <%= n.nama %> CUTI / BALIK HARI INI</div>
-<% }) %>
+<div class="header">
+  <h1>🔥 Dashboard Kantor PRO</h1>
 </div>
 
+<div class="grid">
+
+<!-- NOTIF -->
 <div class="card">
-<h2>TAMBAH STAFF</h2>
+<h2>Notifikasi Cuti</h2>
+<div class="list">
+<% if(notif.length === 0){ %>
+<div class="item">Tidak ada notifikasi</div>
+<% } %>
+
+<% notif.forEach(n=>{ %>
+<div class="item">⚠️ <%= n.nama %> cuti / kembali hari ini</div>
+<% }) %>
+</div>
+</div>
+
+<!-- TAMBAH STAFF -->
+<div class="card">
+<h2>Tambah Staff</h2>
 <form method="POST" action="/add/staff">
-<input name="nama" placeholder="Nama">
-<select name="shift"><option>PAGI</option><option>SIANG</option></select>
+<input name="nama" placeholder="Nama" required>
+<select name="shift">
+<option>PAGI</option>
+<option>SIANG</option>
+</select>
 <select name="jobdesk">
 <option>DP</option>
 <option>WD</option>
@@ -41,46 +155,81 @@ button{background:#22c55e}
 </form>
 </div>
 
+<!-- DATA STAFF -->
 <div class="card">
-<h2>DATA STAFF</h2>
+<h2>Data Staff</h2>
+<div class="scroll">
 <% staff.forEach(s=>{ %>
-<div><%= s.nama %> | <%= s.shift %> | <%= s.jobdesk %></div>
+<div class="item">
+<b><%= s.nama %></b><br>
+Shift: <%= s.shift %> | Job: <%= s.jobdesk %>
+</div>
 <% }) %>
 </div>
+</div>
 
+<!-- DATA AKUN -->
 <div class="card">
-<h2>DATA AKUN (ID & PSW)</h2>
+<h2>Data Akun (ID & Password)</h2>
+
 <form method="POST" action="/add/akun">
-<input name="id" placeholder="ID">
-<input name="psw" placeholder="Password">
+<input name="id" placeholder="ID" required>
+<input name="psw" placeholder="Password" required>
 <button>Tambah</button>
 </form>
+
+<div class="scroll">
 <% akun.forEach(a=>{ %>
-<div><%= a.id %> - <%= a.psw %></div>
+<div class="item">
+<b><%= a.id %></b><br>
+PSW: <%= a.psw %>
+</div>
 <% }) %>
 </div>
+</div>
 
+<!-- CASE -->
 <div class="card">
-<h2>CASE MASALAH</h2>
+<h2>Case Masalah</h2>
+
 <form method="POST" action="/add/case">
-<input name="case" placeholder="Masalah">
+<input name="case" placeholder="Masalah" required>
 <button>Tambah</button>
 </form>
 
+<div class="scroll">
 <% case.forEach((c,i)=>{ %>
-<div>
-<b><%= c.case %></b> | <%= c.status || 'BELUM' %> | <%= c.note || '-' %>
+<div class="item">
+
+<b><%= c.case %></b><br>
+
+Status:
+<span class="<%= c.status === 'SELESAI' ? 'status-selesai' : 'status-belum' %>">
+<%= c.status || 'BELUM' %>
+</span>
+<br>
+
+Note: <%= c.note || '-' %>
+
 <form method="POST" action="/update-case">
 <input type="hidden" name="index" value="<%= i %>">
+
 <select name="status">
-<option>SELESAI</option>
-<option>BELUM</option>
+<option value="SELESAI">SELESAI</option>
+<option value="BELUM">BELUM</option>
 </select>
-<input name="note" placeholder="Note">
+
+<input name="note" placeholder="Tambahkan note">
+
 <button>Update</button>
 </form>
+
 </div>
 <% }) %>
+</div>
+
+</div>
+
 </div>
 
 </body>
