@@ -1,270 +1,85 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Kantor</title>
-
+<title>Dashboard</title>
 <style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#0f172a;
-  color:#fff;
-  display:flex;
-}
-
-/* SIDEBAR */
-.sidebar{
-  width:220px;
-  background:#020617;
-  height:100vh;
-  padding:20px;
-}
-
-.sidebar h2{
-  margin-bottom:20px;
-}
-
-.menu a{
-  display:block;
-  padding:10px;
-  margin:5px 0;
-  text-decoration:none;
-  color:#94a3b8;
-  border-radius:8px;
-}
-
-.menu a:hover{
-  background:#1e293b;
-  color:#fff;
-}
-
-/* MAIN */
-.main{
-  flex:1;
-  padding:20px;
-}
-
-/* CARD */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:15px;
-}
-
-.card{
-  background:#1e293b;
-  padding:15px;
-  border-radius:12px;
-}
-
-/* FORM */
-input,select{
-  width:100%;
-  padding:8px;
-  margin:5px 0;
-  border:none;
-  border-radius:6px;
-  background:#0f172a;
-  color:#fff;
-}
-
-button{
-  padding:8px;
-  border:none;
-  border-radius:6px;
-  background:#22c55e;
-  cursor:pointer;
-  margin-top:5px;
-}
-
-.delete{
-  background:#ef4444;
-}
-
-/* STATUS */
-.status-belum{color:#facc15;}
-.status-selesai{color:#4ade80;}
-
-.scroll{
-  max-height:200px;
-  overflow:auto;
-}
+body{margin:0;font-family:Arial;background:#0f172a;color:#fff;display:flex}
+.sidebar{width:220px;background:#020617;height:100vh;padding:20px}
+.menu a{display:block;padding:10px;margin:5px 0;color:#94a3b8;text-decoration:none;border-radius:6px}
+.menu a.active,.menu a:hover{background:#1e293b;color:#fff}
+.main{flex:1;padding:20px}
+.tab{display:none}
+.tab.active{display:block}
+.card{background:#1e293b;padding:15px;border-radius:10px;margin-bottom:15px}
 </style>
 </head>
-
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
-  <h2>🏢 PANEL</h2>
-
-  <div class="menu">
-    <a href="#">Dashboard</a>
-    <a href="#">Staff</a>
-    <a href="#">Rekening</a>
-    <a href="#">Masalah</a>
-    <a href="#">SP Staff</a>
-  </div>
+<h2>PANEL</h2>
+<div class="menu">
+<a onclick="openTab('dashboard')" class="active">Dashboard</a>
+<a onclick="openTab('staff')">Staff</a>
+<a onclick="openTab('case')">Case</a>
+<a onclick="openTab('akun')">Akun</a>
+</div>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
-<h1>🔥 Dashboard Kantor</h1>
-
-<div class="grid">
-
-<!-- STAT -->
-<div class="card">
-<h3>Total Staff</h3>
-<h2><%= staff.length %></h2>
+<div id="dashboard" class="tab active">
+<div class="card">Total Staff: <%= staff.length %></div>
+<div class="card">Total Case: <%= cases.length %></div>
 </div>
 
+<div id="staff" class="tab">
 <div class="card">
-<h3>Total Case</h3>
-<h2><%= cases.length %></h2>
-</div>
-
-<div class="card">
-<h3>Belum Selesai</h3>
-<h2>
-<%= cases.filter(c=>!c.status || c.status==='BELUM').length %>
-</h2>
-</div>
-
-</div>
-
-<br>
-
-<div class="grid">
-
-<!-- STAFF PAGI -->
-<div class="card">
-<h3>Staff Pagi</h3>
-
 <form method="POST" action="/add/staff">
 <input name="nama" placeholder="Nama">
-<input type="hidden" name="shift" value="PAGI">
-
-<select name="jobdesk">
-<option>DEPO</option>
-<option>WD</option>
-<option>LIVECHAT</option>
-</select>
-
 <button>Tambah</button>
 </form>
-
-<div class="scroll">
-<% staff.filter(s=>s.shift==='PAGI').forEach((s,i)=>{ %>
-<div>
-<%= s.nama %> - <%= s.jobdesk %>
-
+<% staff.forEach((s,i)=>{ %>
+<div><%= s.nama %>
 <form method="POST" action="/delete/staff">
 <input type="hidden" name="index" value="<%= i %>">
-<button class="delete">Hapus</button>
+<button>Hapus</button>
 </form>
-
 </div>
 <% }) %>
 </div>
 </div>
 
-<!-- STAFF MALAM -->
+<div id="case" class="tab">
 <div class="card">
-<h3>Staff Malam</h3>
-
-<form method="POST" action="/add/staff">
-<input name="nama" placeholder="Nama">
-<input type="hidden" name="shift" value="MALAM">
-
-<select name="jobdesk">
-<option>DEPO</option>
-<option>WD</option>
-<option>LIVECHAT</option>
-</select>
-
-<button>Tambah</button>
-</form>
-
-<div class="scroll">
-<% staff.filter(s=>s.shift==='MALAM').forEach((s,i)=>{ %>
-<div>
-<%= s.nama %> - <%= s.jobdesk %>
-
-<form method="POST" action="/delete/staff">
-<input type="hidden" name="index" value="<%= i %>">
-<button class="delete">Hapus</button>
-</form>
-
-</div>
-<% }) %>
-</div>
-</div>
-
-<!-- CASE -->
-<div class="card">
-<h3>Case Masalah</h3>
-
 <form method="POST" action="/add/cases">
-<input name="case" placeholder="Masalah">
+<input name="case" placeholder="Case">
 <button>Tambah</button>
 </form>
-
-<div class="scroll">
 <% cases.forEach((c,i)=>{ %>
-<div>
-
-<b><%= c.case %></b><br>
-
-<span class="<%= c.status==='SELESAI'?'status-selesai':'status-belum' %>">
-<%= c.status || 'BELUM' %>
-</span>
-
-<form method="POST" action="/update-case">
+<div><%= c.case %>
+<form method="POST" action="/delete/cases">
 <input type="hidden" name="index" value="<%= i %>">
-
-<select name="status">
-<option>SELESAI</option>
-<option>BELUM</option>
-</select>
-
-<input name="note" placeholder="Note">
-<button>Update</button>
+<button>Hapus</button>
 </form>
-
-<form method="POST" action="/delete-case">
-<input type="hidden" name="index" value="<%= i %>">
-<button class="delete">Hapus</button>
-</form>
-
 </div>
 <% }) %>
 </div>
 </div>
 
-<!-- AKUN -->
+<div id="akun" class="tab">
 <div class="card">
-<h3>Data Akun</h3>
-
 <form method="POST" action="/add/akun">
 <input name="id" placeholder="ID">
 <input name="psw" placeholder="Password">
 <button>Tambah</button>
 </form>
-
-<div class="scroll">
 <% akun.forEach((a,i)=>{ %>
-<div>
-<%= a.id %> - <%= a.psw %>
-
+<div><%= a.id %>
 <form method="POST" action="/delete/akun">
 <input type="hidden" name="index" value="<%= i %>">
-<button class="delete">Hapus</button>
+<button>Hapus</button>
 </form>
-
 </div>
 <% }) %>
 </div>
@@ -272,7 +87,15 @@ button{
 
 </div>
 
-</div>
+<script>
+function openTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+
+  document.querySelectorAll('.menu a').forEach(a=>a.classList.remove('active'));
+  event.target.classList.add('active');
+}
+</script>
 
 </body>
 </html>
