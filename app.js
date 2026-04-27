@@ -18,7 +18,7 @@ const DATA_DIR = process.env.DATA_DIR || path.join(__dirname,'data');
 fs.ensureDirSync(DATA_DIR);
 
 const file = (n)=>path.join(DATA_DIR, n+'.json');
-const types = ['staff','case','akun'];
+const types = ['staff','cases','akun']; // 🔥 GANTI case → cases
 
 types.forEach(t=>{
   if(!fs.existsSync(file(t))) fs.writeJsonSync(file(t),[]);
@@ -47,9 +47,7 @@ function getIP(req){
 }
 
 function checkIP(req,res,next){
-  if(ALLOWED_IPS.length === 0){
-    return next(); // kalau kosong → bebas (biar gak ke-lock)
-  }
+  if(ALLOWED_IPS.length === 0) return next();
 
   const ip = getIP(req);
 
@@ -83,12 +81,12 @@ app.post('/login',(req,res)=>{
 // ================= DASHBOARD =================
 app.get('/', checkIP, auth, async(req,res)=>{
   const staff = await fs.readJson(file('staff'));
-  const caseData = await fs.readJson(file('case'));
+  const cases = await fs.readJson(file('cases'));
   const akun = await fs.readJson(file('akun'));
 
   res.render('dashboard',{
     staff,
-    case: caseData,
+    cases, // 🔥 pakai cases
     akun,
     notif:[]
   });
@@ -107,14 +105,14 @@ app.post('/add/:type', checkIP, auth, async(req,res)=>{
 
 // ================= UPDATE CASE =================
 app.post('/update-case', checkIP, auth, async(req,res)=>{
-  let data = await fs.readJson(file('case'));
+  let data = await fs.readJson(file('cases'));
 
   const {index,status,note} = req.body;
 
   data[index].status = status;
   data[index].note = note;
 
-  await fs.writeJson(file('case'),data);
+  await fs.writeJson(file('cases'),data);
   res.redirect('/');
 });
 
