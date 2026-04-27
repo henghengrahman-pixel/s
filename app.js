@@ -19,7 +19,7 @@ fs.ensureDirSync(DATA_DIR);
 
 const file = (n)=>path.join(DATA_DIR, n+'.json');
 
-// 🔥 GANTI case → cases
+// 🔥 FIX FINAL TYPES
 const types = ['staff','cases','akun'];
 
 types.forEach(t=>{
@@ -82,51 +82,90 @@ app.post('/login',(req,res)=>{
 
 // ================= DASHBOARD =================
 app.get('/', checkIP, auth, async(req,res)=>{
-  const staff = await fs.readJson(file('staff'));
-  const cases = await fs.readJson(file('cases'));
-  const akun = await fs.readJson(file('akun'));
+  try{
+    const staff = await fs.readJson(file('staff'));
+    const cases = await fs.readJson(file('cases'));
+    const akun = await fs.readJson(file('akun'));
 
-  res.render('dashboard',{
-    staff,
-    cases, // 🔥 FIX
-    akun,
-    notif:[]
-  });
+    res.render('dashboard',{
+      staff,
+      cases,
+      akun,
+      notif:[]
+    });
+
+  } catch(e){
+    res.send('ERROR LOAD DATA');
+  }
 });
 
 // ================= ADD DATA =================
 app.post('/add/:type', checkIP, auth, async(req,res)=>{
-  const f = file(req.params.type);
+  try{
+    const type = req.params.type;
 
-  let data = await fs.readJson(f);
-  data.push(req.body);
+    if(!types.includes(type)){
+      return res.send('TYPE TIDAK VALID');
+    }
 
-  await fs.writeJson(f,data);
-  res.redirect('/');
+    const f = file(type);
+    let data = await fs.readJson(f);
+
+    data.push(req.body);
+
+    await fs.writeJson(f,data);
+    res.redirect('/');
+
+  } catch(e){
+    res.send('ERROR ADD DATA');
+  }
+});
+
+// ================= DELETE UNIVERSAL =================
+app.post('/delete/:type', checkIP, auth, async(req,res)=>{
+  try{
+    const type = req.params.type;
+
+    if(!types.includes(type)){
+      return res.send('TYPE TIDAK VALID');
+    }
+
+    const f = file(type);
+    let data = await fs.readJson(f);
+
+    const index = parseInt(req.body.index);
+
+    if(isNaN(index)) return res.redirect('/');
+
+    data.splice(index,1);
+
+    await fs.writeJson(f,data);
+    res.redirect('/');
+
+  } catch(e){
+    res.send('ERROR DELETE');
+  }
 });
 
 // ================= UPDATE CASE =================
 app.post('/update-case', checkIP, auth, async(req,res)=>{
-  let data = await fs.readJson(file('cases'));
+  try{
+    let data = await fs.readJson(file('cases'));
 
-  const {index,status,note} = req.body;
+    const index = parseInt(req.body.index);
+    const {status,note} = req.body;
 
-  data[index].status = status;
-  data[index].note = note;
+    if(!data[index]) return res.redirect('/');
 
-  await fs.writeJson(file('cases'),data);
-  res.redirect('/');
-});
+    data[index].status = status;
+    data[index].note = note;
 
-// ================= DELETE CASE =================
-app.post('/delete-case', checkIP, auth, async(req,res)=>{
-  let data = await fs.readJson(file('cases'));
+    await fs.writeJson(file('cases'),data);
+    res.redirect('/');
 
-  const {index} = req.body;
-  data.splice(index,1);
-
-  await fs.writeJson(file('cases'),data);
-  res.redirect('/');
+  } catch(e){
+    res.send('ERROR UPDATE');
+  }
 });
 
 // ================= SERVER =================
