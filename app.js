@@ -1,105 +1,87 @@
-require('dotenv').config();
-const express = require('express');
-const session = require('express-session');
-const fs = require('fs-extra');
-const path = require('path');
-const http = require('http');
-const { Server } = require('socket.io');
-const TelegramBot = require('node-telegram-bot-api');
 
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
+<!DOCTYPE html>
+<html>
+<head>
+<title>PRO DASHBOARD</title>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+socket.on('update',()=>location.reload());
+</script>
+<style>
+body{background:#0f172a;color:#fff;font-family:sans-serif;padding:20px}
+.card{background:#1e293b;padding:15px;margin:10px 0;border-radius:12px}
+h2{margin-top:0}
+input,select,button{margin:5px;padding:8px;border-radius:6px;border:none}
+button{background:#22c55e}
+</style>
+</head>
+<body>
 
-const PORT = process.env.PORT || 3000;
-app.set('trust proxy', 1);
+<h1>🔥 DASHBOARD KANTOR PRO</h1>
 
-// VIEW ENGINE
-app.set('view engine','ejs');
-app.set('views', path.join(__dirname,'views'));
+<div class="card">
+<h2>NOTIFIKASI CUTI</h2>
+<% notif.forEach(n=>{ %>
+<div>⚠️ <%= n.nama %> CUTI / BALIK HARI INI</div>
+<% }) %>
+</div>
 
-// DATA
-const DATA_DIR = process.env.DATA_DIR || path.join(__dirname,'data');
-fs.ensureDirSync(DATA_DIR);
+<div class="card">
+<h2>TAMBAH STAFF</h2>
+<form method="POST" action="/add/staff">
+<input name="nama" placeholder="Nama">
+<select name="shift"><option>PAGI</option><option>SIANG</option></select>
+<select name="jobdesk">
+<option>DP</option>
+<option>WD</option>
+<option>LIVECHAT</option>
+</select>
+<button>Tambah</button>
+</form>
+</div>
 
-const file = (n)=>path.join(DATA_DIR, n+'.json');
-const types = ['staff','activity','case','akun'];
+<div class="card">
+<h2>DATA STAFF</h2>
+<% staff.forEach(s=>{ %>
+<div><%= s.nama %> | <%= s.shift %> | <%= s.jobdesk %></div>
+<% }) %>
+</div>
 
-types.forEach(t=>{
-  if(!fs.existsSync(file(t))) fs.writeJsonSync(file(t),[]);
-});
+<div class="card">
+<h2>DATA AKUN (ID & PSW)</h2>
+<form method="POST" action="/add/akun">
+<input name="id" placeholder="ID">
+<input name="psw" placeholder="Password">
+<button>Tambah</button>
+</form>
+<% akun.forEach(a=>{ %>
+<div><%= a.id %> - <%= a.psw %></div>
+<% }) %>
+</div>
 
-// MIDDLEWARE
-app.use(express.urlencoded({extended:true}));
-app.use(express.json());
-app.use(express.static(path.join(__dirname,'public')));
+<div class="card">
+<h2>CASE MASALAH</h2>
+<form method="POST" action="/add/case">
+<input name="case" placeholder="Masalah">
+<button>Tambah</button>
+</form>
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'secret',
-  resave:false,
-  saveUninitialized:false
-}));
+<% case.forEach((c,i)=>{ %>
+<div>
+<b><%= c.case %></b> | <%= c.status || 'BELUM' %> | <%= c.note || '-' %>
+<form method="POST" action="/update-case">
+<input type="hidden" name="index" value="<%= i %>">
+<select name="status">
+<option>SELESAI</option>
+<option>BELUM</option>
+</select>
+<input name="note" placeholder="Note">
+<button>Update</button>
+</form>
+</div>
+<% }) %>
+</div>
 
-// AUTH SIMPLE
-function auth(req,res,next){
-  if(!req.session.login) return res.redirect('/login');
-  next();
-}
-
-// LOGIN
-app.get('/login',(req,res)=>res.render('login'));
-app.post('/login',(req,res)=>{
-  const {id,password} = req.body;
-  if(id===process.env.ADMIN_ID && password===process.env.ADMIN_PASSWORD){
-    req.session.login = true;
-    return res.redirect('/');
-  }
-  res.send('Login gagal');
-});
-
-// DASHBOARD
-app.get('/', auth, async(req,res)=>{
-  const staff = await fs.readJson(file('staff'));
-  const activity = await fs.readJson(file('activity'));
-  const caseData = await fs.readJson(file('case'));
-  const akun = await fs.readJson(file('akun'));
-
-  res.render('dashboard',{
-    staff,
-    case: caseData,
-    akun,
-    notif:[]
-  });
-});
-
-// ADD DATA
-app.post('/add/:type', auth, async(req,res)=>{
-  const f = file(req.params.type);
-  let data = await fs.readJson(f);
-  data.push(req.body);
-  await fs.writeJson(f,data);
-  io.emit('update');
-  res.redirect('/');
-});
-
-// UPDATE CASE
-app.post('/update-case', auth, async(req,res)=>{
-  let data = await fs.readJson(file('case'));
-  const {index,status,note} = req.body;
-  data[index].status = status;
-  data[index].note = note;
-  await fs.writeJson(file('case'),data);
-  io.emit('update');
-  res.redirect('/');
-});
-
-// BOT OPTIONAL
-let bot = null;
-if(process.env.BOT_TOKEN){
-  bot = new TelegramBot(process.env.BOT_TOKEN,{polling:true});
-  console.log("BOT AKTIF");
-}else{
-  console.log("BOT OFF");
-}
-
-server.listen(PORT,()=>console.log('RUNNING '+PORT));
+</body>
+</html>
