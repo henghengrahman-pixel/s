@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
 <body>
+
 <h1>DASHBOARD</h1>
 
 <h2>Tambah Staff</h2>
 <form method="POST" action="/add/staff">
-<input name="nama">
+<input name="nama" required>
 <button>Tambah</button>
 </form>
 
@@ -15,23 +16,28 @@
 <% }) %>
 
 <h2>Case</h2>
-<form method="POST" action="/add/case">
-<input name="case">
+<form method="POST" action="/add/cases">
+<input name="case" required>
 <button>Tambah</button>
 </form>
 
-<% case.forEach((c,i)=>{ %>
+<% cases.forEach((c,i)=>{ %>
 <div>
-<%= c.case %> - <%= c.status||'BELUM' %>
+<b><%= c.case %></b> - <%= c.status || 'BELUM' %>
+
 <form method="POST" action="/update-case">
 <input type="hidden" name="index" value="<%= i %>">
+
 <select name="status">
-<option>SELESAI</option>
-<option>BELUM</option>
+<option value="SELESAI">SELESAI</option>
+<option value="BELUM">BELUM</option>
 </select>
-<input name="note">
+
+<input name="note" placeholder="Note">
+
 <button>Update</button>
 </form>
+
 </div>
 <% }) %>
 
