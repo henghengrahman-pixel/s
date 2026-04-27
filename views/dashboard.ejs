@@ -3,22 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard PRO</title>
+<title>Dashboard Kantor</title>
 
 <style>
 body{
   margin:0;
   font-family:Arial;
-  background:#020617;
+  background:#0f172a;
   color:#fff;
+  display:flex;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:220px;
+  background:#020617;
+  height:100vh;
   padding:20px;
 }
 
-h1{margin-bottom:20px;}
+.sidebar h2{
+  margin-bottom:20px;
+}
 
+.menu a{
+  display:block;
+  padding:10px;
+  margin:5px 0;
+  text-decoration:none;
+  color:#94a3b8;
+  border-radius:8px;
+}
+
+.menu a:hover{
+  background:#1e293b;
+  color:#fff;
+}
+
+/* MAIN */
+.main{
+  flex:1;
+  padding:20px;
+}
+
+/* CARD */
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
   gap:15px;
 }
 
@@ -28,22 +59,22 @@ h1{margin-bottom:20px;}
   border-radius:12px;
 }
 
+/* FORM */
 input,select{
   width:100%;
-  padding:10px;
+  padding:8px;
   margin:5px 0;
   border:none;
-  border-radius:8px;
+  border-radius:6px;
   background:#0f172a;
   color:#fff;
 }
 
 button{
-  padding:10px;
+  padding:8px;
   border:none;
-  border-radius:8px;
+  border-radius:6px;
   background:#22c55e;
-  font-weight:bold;
   cursor:pointer;
   margin-top:5px;
 }
@@ -52,94 +83,155 @@ button{
   background:#ef4444;
 }
 
+/* STATUS */
 .status-belum{color:#facc15;}
 .status-selesai{color:#4ade80;}
 
 .scroll{
-  max-height:250px;
+  max-height:200px;
   overflow:auto;
-}
-
-.stat{
-  font-size:14px;
-  margin:5px 0;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🔥 Dashboard Kantor PRO</h1>
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h2>🏢 PANEL</h2>
+
+  <div class="menu">
+    <a href="#">Dashboard</a>
+    <a href="#">Staff</a>
+    <a href="#">Rekening</a>
+    <a href="#">Masalah</a>
+    <a href="#">SP Staff</a>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<h1>🔥 Dashboard Kantor</h1>
 
 <div class="grid">
 
 <!-- STAT -->
 <div class="card">
-<h3>Statistik</h3>
-<div class="stat">Total Staff: <%= staff.length %></div>
-<div class="stat">Total Case: <%= cases.length %></div>
-<div class="stat">
-Belum Selesai:
-<%= cases.filter(c=>!c.status || c.status==='BELUM').length %>
-</div>
+<h3>Total Staff</h3>
+<h2><%= staff.length %></h2>
 </div>
 
-<!-- TAMBAH STAFF -->
 <div class="card">
-<h3>Tambah Staff</h3>
+<h3>Total Case</h3>
+<h2><%= cases.length %></h2>
+</div>
+
+<div class="card">
+<h3>Belum Selesai</h3>
+<h2>
+<%= cases.filter(c=>!c.status || c.status==='BELUM').length %>
+</h2>
+</div>
+
+</div>
+
+<br>
+
+<div class="grid">
+
+<!-- STAFF PAGI -->
+<div class="card">
+<h3>Staff Pagi</h3>
+
 <form method="POST" action="/add/staff">
-<input name="nama" placeholder="Nama" required>
+<input name="nama" placeholder="Nama">
+<input type="hidden" name="shift" value="PAGI">
+
+<select name="jobdesk">
+<option>DEPO</option>
+<option>WD</option>
+<option>LIVECHAT</option>
+</select>
+
 <button>Tambah</button>
 </form>
-</div>
 
-<!-- STAFF -->
-<div class="card">
-<h3>Data Staff</h3>
 <div class="scroll">
-<% staff.forEach(s=>{ %>
-<div><%= s.nama %></div>
+<% staff.filter(s=>s.shift==='PAGI').forEach((s,i)=>{ %>
+<div>
+<%= s.nama %> - <%= s.jobdesk %>
+
+<form method="POST" action="/delete/staff">
+<input type="hidden" name="index" value="<%= i %>">
+<button class="delete">Hapus</button>
+</form>
+
+</div>
 <% }) %>
 </div>
 </div>
 
-<!-- TAMBAH CASE -->
+<!-- STAFF MALAM -->
 <div class="card">
-<h3>Tambah Case</h3>
-<form method="POST" action="/add/cases">
-<input name="case" placeholder="Masalah" required>
+<h3>Staff Malam</h3>
+
+<form method="POST" action="/add/staff">
+<input name="nama" placeholder="Nama">
+<input type="hidden" name="shift" value="MALAM">
+
+<select name="jobdesk">
+<option>DEPO</option>
+<option>WD</option>
+<option>LIVECHAT</option>
+</select>
+
 <button>Tambah</button>
 </form>
+
+<div class="scroll">
+<% staff.filter(s=>s.shift==='MALAM').forEach((s,i)=>{ %>
+<div>
+<%= s.nama %> - <%= s.jobdesk %>
+
+<form method="POST" action="/delete/staff">
+<input type="hidden" name="index" value="<%= i %>">
+<button class="delete">Hapus</button>
+</form>
+
+</div>
+<% }) %>
+</div>
 </div>
 
 <!-- CASE -->
 <div class="card">
 <h3>Case Masalah</h3>
-<div class="scroll">
 
+<form method="POST" action="/add/cases">
+<input name="case" placeholder="Masalah">
+<button>Tambah</button>
+</form>
+
+<div class="scroll">
 <% cases.forEach((c,i)=>{ %>
-<div style="margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:10px">
+<div>
 
 <b><%= c.case %></b><br>
 
-Status:
 <span class="<%= c.status==='SELESAI'?'status-selesai':'status-belum' %>">
 <%= c.status || 'BELUM' %>
 </span>
-
-<br>
-Note: <%= c.note || '-' %>
 
 <form method="POST" action="/update-case">
 <input type="hidden" name="index" value="<%= i %>">
 
 <select name="status">
-<option value="SELESAI">SELESAI</option>
-<option value="BELUM">BELUM</option>
+<option>SELESAI</option>
+<option>BELUM</option>
 </select>
 
-<input name="note" placeholder="Tambah note">
-
+<input name="note" placeholder="Note">
 <button>Update</button>
 </form>
 
@@ -150,8 +242,34 @@ Note: <%= c.note || '-' %>
 
 </div>
 <% }) %>
+</div>
+</div>
+
+<!-- AKUN -->
+<div class="card">
+<h3>Data Akun</h3>
+
+<form method="POST" action="/add/akun">
+<input name="id" placeholder="ID">
+<input name="psw" placeholder="Password">
+<button>Tambah</button>
+</form>
+
+<div class="scroll">
+<% akun.forEach((a,i)=>{ %>
+<div>
+<%= a.id %> - <%= a.psw %>
+
+<form method="POST" action="/delete/akun">
+<input type="hidden" name="index" value="<%= i %>">
+<button class="delete">Hapus</button>
+</form>
 
 </div>
+<% }) %>
+</div>
+</div>
+
 </div>
 
 </div>
