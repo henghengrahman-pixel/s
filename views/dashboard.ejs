@@ -1,29 +1,134 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard PRO</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#020617;
+  color:#fff;
+  padding:20px;
+}
+
+h1{margin-bottom:20px;}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:15px;
+}
+
+.card{
+  background:#1e293b;
+  padding:15px;
+  border-radius:12px;
+}
+
+input,select{
+  width:100%;
+  padding:10px;
+  margin:5px 0;
+  border:none;
+  border-radius:8px;
+  background:#0f172a;
+  color:#fff;
+}
+
+button{
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:#22c55e;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:5px;
+}
+
+.delete{
+  background:#ef4444;
+}
+
+.status-belum{color:#facc15;}
+.status-selesai{color:#4ade80;}
+
+.scroll{
+  max-height:250px;
+  overflow:auto;
+}
+
+.stat{
+  font-size:14px;
+  margin:5px 0;
+}
+</style>
+</head>
+
 <body>
 
-<h1>DASHBOARD</h1>
+<h1>🔥 Dashboard Kantor PRO</h1>
 
-<h2>Tambah Staff</h2>
+<div class="grid">
+
+<!-- STAT -->
+<div class="card">
+<h3>Statistik</h3>
+<div class="stat">Total Staff: <%= staff.length %></div>
+<div class="stat">Total Case: <%= cases.length %></div>
+<div class="stat">
+Belum Selesai:
+<%= cases.filter(c=>!c.status || c.status==='BELUM').length %>
+</div>
+</div>
+
+<!-- TAMBAH STAFF -->
+<div class="card">
+<h3>Tambah Staff</h3>
 <form method="POST" action="/add/staff">
-<input name="nama" required>
+<input name="nama" placeholder="Nama" required>
 <button>Tambah</button>
 </form>
+</div>
 
-<h2>Staff</h2>
+<!-- STAFF -->
+<div class="card">
+<h3>Data Staff</h3>
+<div class="scroll">
 <% staff.forEach(s=>{ %>
 <div><%= s.nama %></div>
 <% }) %>
+</div>
+</div>
 
-<h2>Case</h2>
+<!-- TAMBAH CASE -->
+<div class="card">
+<h3>Tambah Case</h3>
 <form method="POST" action="/add/cases">
-<input name="case" required>
+<input name="case" placeholder="Masalah" required>
 <button>Tambah</button>
 </form>
+</div>
+
+<!-- CASE -->
+<div class="card">
+<h3>Case Masalah</h3>
+<div class="scroll">
 
 <% cases.forEach((c,i)=>{ %>
-<div>
-<b><%= c.case %></b> - <%= c.status || 'BELUM' %>
+<div style="margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:10px">
+
+<b><%= c.case %></b><br>
+
+Status:
+<span class="<%= c.status==='SELESAI'?'status-selesai':'status-belum' %>">
+<%= c.status || 'BELUM' %>
+</span>
+
+<br>
+Note: <%= c.note || '-' %>
 
 <form method="POST" action="/update-case">
 <input type="hidden" name="index" value="<%= i %>">
@@ -33,13 +138,23 @@
 <option value="BELUM">BELUM</option>
 </select>
 
-<input name="note" placeholder="Note">
+<input name="note" placeholder="Tambah note">
 
 <button>Update</button>
 </form>
 
+<form method="POST" action="/delete-case">
+<input type="hidden" name="index" value="<%= i %>">
+<button class="delete">Hapus</button>
+</form>
+
 </div>
 <% }) %>
+
+</div>
+</div>
+
+</div>
 
 </body>
 </html>
