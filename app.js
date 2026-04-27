@@ -18,7 +18,9 @@ const DATA_DIR = process.env.DATA_DIR || path.join(__dirname,'data');
 fs.ensureDirSync(DATA_DIR);
 
 const file = (n)=>path.join(DATA_DIR, n+'.json');
-const types = ['staff','cases','akun']; // 🔥 GANTI case → cases
+
+// 🔥 GANTI case → cases
+const types = ['staff','cases','akun'];
 
 types.forEach(t=>{
   if(!fs.existsSync(file(t))) fs.writeJsonSync(file(t),[]);
@@ -86,7 +88,7 @@ app.get('/', checkIP, auth, async(req,res)=>{
 
   res.render('dashboard',{
     staff,
-    cases, // 🔥 pakai cases
+    cases, // 🔥 FIX
     akun,
     notif:[]
   });
@@ -111,6 +113,17 @@ app.post('/update-case', checkIP, auth, async(req,res)=>{
 
   data[index].status = status;
   data[index].note = note;
+
+  await fs.writeJson(file('cases'),data);
+  res.redirect('/');
+});
+
+// ================= DELETE CASE =================
+app.post('/delete-case', checkIP, auth, async(req,res)=>{
+  let data = await fs.readJson(file('cases'));
+
+  const {index} = req.body;
+  data.splice(index,1);
 
   await fs.writeJson(file('cases'),data);
   res.redirect('/');
